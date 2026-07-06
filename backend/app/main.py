@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import json
 import queue
+import random
 import threading
 from datetime import datetime, timedelta, timezone
 
@@ -14,7 +15,7 @@ from pydantic import BaseModel
 
 from . import store
 from .config import settings
-from .events import done, error
+from .events import done, error, step
 from .llm import ClaudeLLM
 from .orchestrator import run_skill
 from .skills.registry import SKILLS, get_skill, pick_random_skill
@@ -48,6 +49,9 @@ def _run_worker(q: "queue.Queue", skill, note: str | None = None) -> None:
 
     try:
         interests = store.get_interests(settings.user_id)
+        if skill.sample_one_interest and interests:
+            interests = [random.choice(interests)]
+            emit(step(f"Focusing on: {interests[0]}", skill=skill.name))
         now_iso = datetime.now().astimezone().isoformat(timespec="seconds")
         result = run_skill(
             skill,
@@ -62,7 +66,7 @@ def _run_worker(q: "queue.Queue", skill, note: str | None = None) -> None:
         interaction_id = store.save_interaction(
             result.skill, skill.title, result.output, result.steps
         )
-        emit(done(skill.title, result.output, interaction_id))
+        emit(done(result.skill, skill.title, result.output, interaction_id))
     except Exception as exc:  # noqa: BLE001 — surface any failure to the client
         emit(error(str(exc)))
     finally:

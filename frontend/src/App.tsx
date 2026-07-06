@@ -6,8 +6,10 @@ import {
   getInteraction,
   getInteractions,
   getInterests,
+  getSkills,
   InteractionSummary,
   putInterests,
+  SkillInfo,
   streamSkill,
   streamSurprise,
   SurpriseEvent,
@@ -18,12 +20,17 @@ const FOLLOWUP_SKILL = "schedule_followup";
 export default function App() {
   const [interactions, setInteractions] = useState<InteractionSummary[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [viewing, setViewing] = useState<{ title: string; output: string } | null>(null);
+  const [viewing, setViewing] = useState<{ skill: string; title: string; output: string } | null>(
+    null,
+  );
   const [interests, setInterests] = useState<string[]>([]);
+  const [skills, setSkills] = useState<SkillInfo[]>([]);
   const [running, setRunning] = useState(false);
   const [events, setEvents] = useState<SurpriseEvent[]>([]);
-  // Title of the just-finished run to follow up on; null once we're on the follow-up itself.
-  const [followupFor, setFollowupFor] = useState<string | null>(null);
+  // The just-finished run to offer a calendar follow-up on; null once on the follow-up itself.
+  const [followupContext, setFollowupContext] = useState<{ title: string; output: string } | null>(
+    null,
+  );
 
   const refreshHistory = useCallback(async () => {
     setInteractions(await getInteractions());
@@ -32,6 +39,7 @@ export default function App() {
   useEffect(() => {
     refreshHistory();
     getInterests().then(setInterests);
+    getSkills().then(setSkills);
   }, [refreshHistory]);
 
   const drive = async (
@@ -42,14 +50,14 @@ export default function App() {
     setEvents([]);
     setViewing(null);
     setSelectedId(null);
-    setFollowupFor(null);
+    setFollowupContext(null);
     try {
       await stream((ev) => {
         setEvents((prev) => [...prev, ev]);
         if (ev.type === "done") {
           refreshHistory();
           // Offer a follow-up on a surprise result, but not on the follow-up itself.
-          if (offerFollowup) setFollowupFor(ev.skill);
+          if (offerFollowup) setFollowupContext({ title: ev.title, output: ev.output });
         }
       });
     } catch (e) {
@@ -61,13 +69,25 @@ export default function App() {
 
   const run = () => drive((onEvent) => streamSurprise(onEvent), true);
 
-  const runFollowup = (note: string) =>
+  const runSkill = (name: string) =>
+    drive((onEvent) => streamSkill(name, null, onEvent), true);
+
+  const runFollowup = () => {
+    if (!followupContext) return;
+    const note =
+      `Follow up on this "${followupContext.title}" result — carry over its relevant ` +
+      `details and links into the event:\n\n${followupContext.output}`;
     drive((onEvent) => streamSkill(FOLLOWUP_SKILL, note, onEvent), false);
+  };
+
+  // Re-run the same skill fresh with the user's typed follow-up as context.
+  const askFollowup = (skill: string, note: string) =>
+    drive((onEvent) => streamSkill(skill, note, onEvent), true);
 
   const openInteraction = async (id: number) => {
     setSelectedId(id);
     const detail = await getInteraction(id);
-    setViewing({ title: detail.title, output: detail.output });
+    setViewing({ skill: detail.skill, title: detail.title, output: detail.output });
   };
 
   const saveInterests = async (items: string[]) => {
@@ -81,13 +101,17 @@ export default function App() {
         running={running}
         events={events}
         onRun={run}
+        // Selectable tasks: enabled, non-write skills (the follow-up stays contextual).
+        skills={skills.filter((s) => s.enabled && s.surprise)}
+        onRunSkill={runSkill}
         viewing={viewing}
         onClearView={() => {
           setViewing(null);
           setSelectedId(null);
         }}
-        followupFor={followupFor}
+        followupFor={followupContext?.title ?? null}
         onFollowup={runFollowup}
+        onAskFollowup={askFollowup}
       />
       <InterestsConfig interests={interests} onSave={saveInterests} />
     </div>

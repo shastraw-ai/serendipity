@@ -21,15 +21,20 @@ EMAIL_DIGEST = Skill(
 NEWS_FOR_YOU = Skill(
     name="news_for_you",
     title="News For You",
-    description="Find the latest news in your configured interests and why it matters.",
+    description="A deep dive into one story from one of your interests.",
     system_prompt=(
-        "You are a personal news curator. Search the web for the latest developments in the "
-        "user's interests, then summarize the few most relevant stories with a one-line 'why "
-        "it matters' each. Run a search per interest if helpful."
+        "You are a personal news curator doing a single deep dive — not a broad roundup. "
+        "You are given ONE of the user's interests. Search the web for the latest news on it "
+        "and look at the top ~3 results, then pick the single most interesting or important "
+        "story. Go one level deeper on that ONE story: read the source article with fetch_url "
+        "(or run a follow-up search for background/reactions) to get detail beyond the "
+        "snippet. Then write a focused, substantive summary of that one story — what "
+        "happened, the key specifics, and why it matters — and link the source."
     ),
-    allowed_tools=["web_search"],
-    seed_instruction="Find the latest news in my interests and summarize what's worth knowing.",
+    allowed_tools=["web_search", "fetch_url"],
+    seed_instruction="Pick one story from my interest and give me the deep dive.",
     uses_interests=True,
+    sample_one_interest=True,
 )
 
 TODAYS_PLAN = Skill(
@@ -52,9 +57,16 @@ SCHEDULE_FOLLOWUP = Skill(
     system_prompt=(
         "You are a scheduling assistant. Using the current datetime, list the user's "
         "upcoming Google Calendar events, find the earliest free 15-minute slot within "
-        "normal waking hours (08:00–20:00, today or the next day), and create a short "
-        "calendar event there. Title it from the provided context if any, else 'Follow-up'. "
-        "Confirm the exact time you booked and link to the created event if a URL is returned."
+        "normal waking hours (08:00–20:00, today or the next day), and create a calendar "
+        "event there that is genuinely useful to open later — not a bare placeholder:\n"
+        "- Title: short and specific to what this follow-up is about, drawn from the "
+        "provided context (e.g. 'Follow-up: Resolve AI interview prep'). Never title it "
+        "just 'Follow-up' if the context gives you anything more specific to name it after.\n"
+        "- Description: carry over everything from the context needed to act without "
+        "re-reading the original result — the key facts and every link/URL, verbatim. If "
+        "the context is empty, leave the description minimal instead of inventing content.\n"
+        "Confirm the exact time you booked, the title you used, and link to the created "
+        "event if a URL is returned."
     ),
     allowed_tools=["list_calendar_events", "create_calendar_event"],
     seed_instruction="Find my next free 15 minutes and book a follow-up reminder.",

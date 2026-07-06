@@ -63,7 +63,7 @@ def run_skill(
     system = build_system_prompt(skill, interests, now_iso)
     seed = skill.seed_instruction
     if extra_context:
-        seed = f"{seed}\n\nContext: {extra_context}"
+        seed = f"{seed}\n\nContext:\n{extra_context}"
     transcript: list[dict[str, Any]] = [{"role": "user", "text": seed}]
     tool_schemas = registry.schemas_for(skill.allowed_tools)
     steps: list[dict[str, Any]] = []

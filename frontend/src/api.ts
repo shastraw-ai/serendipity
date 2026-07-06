@@ -5,6 +5,7 @@ export interface SkillInfo {
   title: string;
   description: string;
   enabled: boolean;
+  surprise: boolean;
 }
 
 export interface InteractionSummary {
@@ -22,7 +23,7 @@ export interface InteractionDetail extends InteractionSummary {
 export type SurpriseEvent =
   | { type: "step"; message: string; tool?: string }
   | { type: "auth_required"; tool: string; url: string }
-  | { type: "done"; skill: string; output: string; interaction_id: number | null }
+  | { type: "done"; skill: string; title: string; output: string; interaction_id: number | null }
   | { type: "error"; message: string };
 
 export async function getSkills(): Promise<SkillInfo[]> {

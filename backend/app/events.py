@@ -15,8 +15,14 @@ def auth_required(tool: str, url: str) -> dict[str, Any]:
     return {"type": "auth_required", "tool": tool, "url": url}
 
 
-def done(skill: str, output: str, interaction_id: int | None = None) -> dict[str, Any]:
-    return {"type": "done", "skill": skill, "output": output, "interaction_id": interaction_id}
+def done(skill: str, title: str, output: str, interaction_id: int | None = None) -> dict[str, Any]:
+    return {
+        "type": "done",
+        "skill": skill,
+        "title": title,
+        "output": output,
+        "interaction_id": interaction_id,
+    }
 
 
 def error(message: str) -> dict[str, Any]:

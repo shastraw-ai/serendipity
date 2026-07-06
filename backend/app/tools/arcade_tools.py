@@ -76,7 +76,13 @@ CALENDAR_CREATE_EVENT = Tool(
                 "type": "string",
                 "description": "End as ISO-8601. Make this 15 min after start for a follow-up.",
             },
-            "description": {"type": "string", "description": "Optional event notes."},
+            "description": {
+                "type": "string",
+                "description": (
+                    "Event notes. Include the full relevant detail and every link/URL from "
+                    "context verbatim, not just a short blurb, so the invite is self-contained."
+                ),
+            },
             "calendar_id": {"type": "string", "default": "primary"},
         },
         "required": ["summary", "start_datetime", "end_datetime"],

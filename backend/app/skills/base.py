@@ -14,6 +14,7 @@ class Skill:
     seed_instruction: str  # first user turn that kicks off the flow
     enabled: bool = True
     uses_interests: bool = False  # inject the user's interests into the system prompt
+    sample_one_interest: bool = False  # narrow interests to one random pick before the run
     surprise: bool = True  # eligible for the random "Surprise Me" pool (writes opt out)
 
     def public(self) -> dict:
