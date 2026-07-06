@@ -1,0 +1,254 @@
+:root {
+  --bg: #0f1117;
+  --panel: #171a23;
+  --panel-2: #1e222d;
+  --border: #2a2f3a;
+  --text: #e7e9ee;
+  --muted: #8b93a5;
+  --accent: #7c5cff;
+  --accent-2: #a78bff;
+  --danger: #ff6b6b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 260px 1fr 260px;
+  height: 100vh;
+}
+
+.history,
+.interests {
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  padding: 18px 16px;
+  overflow-y: auto;
+}
+.interests {
+  border-right: none;
+  border-left: 1px solid var(--border);
+}
+
+h2 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin: 0 0 14px;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* History */
+.history ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.history li {
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 4px;
+}
+.history li:hover {
+  background: var(--panel-2);
+}
+.history li.active {
+  background: var(--panel-2);
+  outline: 1px solid var(--accent);
+}
+.hist-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+.hist-date {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* Center */
+.surprise {
+  padding: 40px;
+  overflow-y: auto;
+}
+.hero {
+  text-align: center;
+  margin-top: 24px;
+  margin-bottom: 28px;
+}
+.surprise-btn {
+  font-size: 22px;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border: none;
+  border-radius: 14px;
+  padding: 20px 42px;
+  cursor: pointer;
+  box-shadow: 0 8px 30px rgba(124, 92, 255, 0.35);
+  transition: transform 0.08s ease, opacity 0.2s;
+}
+.surprise-btn:hover {
+  transform: translateY(-2px);
+}
+.surprise-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
+}
+
+.progress {
+  max-width: 720px;
+  margin: 0 auto 24px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+.progress-line {
+  font-size: 14px;
+  color: var(--muted);
+  padding: 5px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex: none;
+}
+
+.auth-box {
+  max-width: 720px;
+  margin: 0 auto 20px;
+  background: rgba(124, 92, 255, 0.12);
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+.auth-box a {
+  color: var(--accent-2);
+  font-weight: 600;
+}
+
+.error-box {
+  max-width: 720px;
+  margin: 0 auto 20px;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+
+.result {
+  max-width: 760px;
+  margin: 0 auto;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 8px 28px 24px;
+  line-height: 1.6;
+}
+.result-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.result a {
+  color: var(--accent-2);
+}
+.result h3 {
+  color: var(--accent-2);
+}
+
+.link {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.followup {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.followup-btn {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-2);
+  background: rgba(124, 92, 255, 0.12);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: transform 0.08s ease, opacity 0.2s;
+}
+.followup-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* Interests */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.chip.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+.add-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 14px;
+}
+.add-row input {
+  flex: 1;
+  min-width: 0;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 13px;
+}
+.add-row button {
+  background: var(--accent);
+  border: none;
+  color: white;
+  border-radius: 8px;
+  padding: 0 14px;
+  cursor: pointer;
+}
