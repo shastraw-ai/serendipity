@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { SkillInfo, SurpriseEvent } from "../api";
@@ -46,6 +46,15 @@ export default function SurprisePanel({
 }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [askText, setAskText] = useState("");
+  const [expanded, setExpanded] = useState(false);
+  const steps = events.filter((e) => e.type === "step") as Extract<
+    SurpriseEvent,
+    { type: "step" }
+  >[];
+  // Collapse back to a single rolling line whenever a fresh run starts.
+  useEffect(() => {
+    if (steps.length === 0) setExpanded(false);
+  }, [steps.length]);
   const done = events.find((e) => e.type === "done") as
     | Extract<SurpriseEvent, { type: "done" }>
     | undefined;
@@ -96,6 +105,11 @@ export default function SurprisePanel({
           )}
         </div>
         <p className="muted">Runs a random skill — or pick a specific one from the menu.</p>
+        <p className="inspiration">
+          Inspired by <em>Why Greatness Cannot Be Planned</em> — the idea that the most
+          interesting discoveries come from following curiosity, not a fixed objective.
+          Every "Surprise Me" run is a small, deliberate step off the beaten path.
+        </p>
       </div>
 
       {auth && !done && (
@@ -108,15 +122,27 @@ export default function SurprisePanel({
         </div>
       )}
 
-      {(running || events.length > 0) && !viewing && (
+      {(running || steps.length > 0) && !viewing && (
         <div className="progress">
-          {events
-            .filter((e) => e.type === "step")
-            .map((e, i) => (
+          {expanded ? (
+            steps.map((e, i) => (
               <div key={i} className="progress-line">
-                <span className="dot" /> {(e as { message: string }).message}
+                <span className="dot" /> {e.message}
               </div>
-            ))}
+            ))
+          ) : (
+            <div className="progress-line progress-current">
+              <span className="dot" />
+              <span className="progress-text">
+                {steps[steps.length - 1]?.message ?? "Working…"}
+              </span>
+            </div>
+          )}
+          {steps.length > 1 && (
+            <button className="progress-toggle" onClick={() => setExpanded((v) => !v)}>
+              {expanded ? "▴ Show less" : `▾ Show all (${steps.length})`}
+            </button>
+          )}
         </div>
       )}
 

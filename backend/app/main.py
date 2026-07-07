@@ -18,6 +18,7 @@ from .config import settings
 from .events import done, error, step
 from .llm import ClaudeLLM
 from .orchestrator import run_skill
+from .skills.base import Skill
 from .skills.registry import SKILLS, get_skill, pick_random_skill
 from .tools import build_registry
 
@@ -38,7 +39,7 @@ def _startup() -> None:
     store.init_db()
 
 
-def _run_worker(q: "queue.Queue", skill, note: str | None = None) -> None:
+def _run_worker(q: queue.Queue, skill: Skill, note: str | None = None) -> None:
     """Blocking worker: run one skill's loop, pushing events onto the queue.
 
     Runs in a thread so the SSE generator can stream events while Arcade's
@@ -73,8 +74,8 @@ def _run_worker(q: "queue.Queue", skill, note: str | None = None) -> None:
         q.put(None)  # sentinel: stream complete
 
 
-def _stream(skill, note: str | None = None) -> StreamingResponse:
-    q: "queue.Queue" = queue.Queue()
+def _stream(skill: Skill, note: str | None = None) -> StreamingResponse:
+    q: queue.Queue = queue.Queue()
     threading.Thread(target=_run_worker, args=(q, skill, note), daemon=True).start()
 
     async def gen():

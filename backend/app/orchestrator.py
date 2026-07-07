@@ -28,6 +28,10 @@ class RunResult:
 
 _TITLE_PREFIX = "Title:"
 
+# Skills using these need "now" right next to the task, not just in the system prompt,
+# since they compute date windows (today/tomorrow) from it for every tool call.
+_CALENDAR_TOOLS = {"list_calendar_events", "create_calendar_event"}
+
 
 def build_system_prompt(skill: Skill, interests: list[str], now_iso: str) -> str:
     interests_block = ""
@@ -79,6 +83,8 @@ def run_skill(
     emit(step(f"Starting: {skill.title}", skill=skill.name))
     system = build_system_prompt(skill, interests, now_iso)
     seed = skill.seed_instruction
+    if _CALENDAR_TOOLS.intersection(skill.allowed_tools):
+        seed = f"Current datetime (ISO-8601, local): {now_iso}\n\n{seed}"
     if extra_context:
         seed = f"{seed}\n\nContext:\n{extra_context}"
     transcript: list[dict[str, Any]] = [{"role": "user", "text": seed}]

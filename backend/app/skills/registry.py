@@ -57,35 +57,36 @@ TODAYS_PLAN = Skill(
 LATEST_PAPERS = Skill(
     name="latest_papers",
     title="Latest Papers",
-    description="A few genuinely interesting recent research papers, explained.",
+    description="A deep dive into one genuinely interesting recent research paper.",
     system_prompt=(
-        "You are a research scout. Search the web for recent (last few days to weeks) "
-        "notable papers or preprints across science and tech — not tied to any particular "
-        "topic. Prefer arXiv, official conference/journal pages, or credible tech press "
-        "covering a paper. Pick 2-3 that are genuinely interesting or significant (novel "
-        "result, notable authors/lab, real-world impact) rather than just the first hits. "
-        "For each, read enough (fetch_url on the abstract or announcement page if useful) "
-        "to explain in plain language what it does and why it matters."
+        "You are a research scout doing a single deep dive — not a roundup. Search the web "
+        "for recent (last few days to weeks) notable papers or preprints across science and "
+        "tech — not tied to any particular topic. Prefer arXiv, official conference/journal "
+        "pages, or credible tech press covering a paper. Look at the top few candidates, then "
+        "pick the ONE most interesting or significant (novel result, notable authors/lab, "
+        "real-world impact) rather than just the first hit. Go one level deeper on that one "
+        "paper: read the source with fetch_url (abstract or announcement page) to get detail "
+        "beyond the snippet, then explain in plain language what it does and why it matters."
     ),
     allowed_tools=["web_search", "fetch_url"],
-    seed_instruction="What are some interesting recent papers I should know about?",
+    seed_instruction="Pick one interesting recent paper and give me the deep dive.",
 )
 
 LATEST_FUNDED_STARTUPS = Skill(
     name="latest_funded_startups",
     title="Latest Funded Startups",
-    description="Recently announced startup funding rounds worth knowing about.",
+    description="A deep dive into one recently announced startup funding round.",
     system_prompt=(
-        "You are a startup and venture news scout. Search the web for startup funding "
-        "announcements from the last few days (seed through later rounds), across any "
-        "industry. Pick 3-4 that are genuinely notable (large round, notable investors, "
-        "interesting product or market) rather than just the first hits. For each, note the "
-        "company, what it does, the round size and stage, and lead investors if reported."
+        "You are a startup and venture news scout doing a single deep dive — not a roundup. "
+        "Search the web for startup funding announcements from the last few days (seed "
+        "through later rounds), across any industry. Look at the top few candidates, then "
+        "pick the ONE most notable (large round, notable investors, interesting product or "
+        "market) rather than just the first hit. Go one level deeper on that one round: read "
+        "the source with fetch_url if useful, then explain the company, what it does, the "
+        "round size and stage, and lead investors if reported."
     ),
     allowed_tools=["web_search", "fetch_url"],
-    seed_instruction=(
-        "What startup funding rounds have been announced recently that are worth knowing about?"
-    ),
+    seed_instruction="Pick one notable recent startup funding round and give me the deep dive.",
 )
 
 SCHEDULE_FOLLOWUP = Skill(

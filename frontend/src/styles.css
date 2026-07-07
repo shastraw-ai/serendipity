@@ -120,6 +120,17 @@ h2 {
   margin-top: 24px;
   margin-bottom: 28px;
 }
+.inspiration {
+  max-width: 460px;
+  margin: 12px auto 0;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--muted);
+}
+.inspiration em {
+  color: var(--accent-2);
+  font-style: italic;
+}
 .surprise-split {
   position: relative;
   display: inline-flex;
@@ -211,12 +222,26 @@ h2 {
   align-items: center;
   gap: 10px;
 }
+.progress-current .progress-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
   background: var(--accent);
   flex: none;
+}
+.progress-toggle {
+  margin-top: 4px;
+  background: none;
+  border: none;
+  color: var(--accent-2);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 0;
 }
 
 .auth-box {
