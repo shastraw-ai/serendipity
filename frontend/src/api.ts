@@ -55,6 +55,18 @@ export async function putInterests(items: string[]): Promise<string[]> {
 // POST /surprise streams newline-delimited SSE ("data: {json}\n\n"). EventSource is
 // GET-only, so we read the response body stream ourselves.
 async function streamEvents(resp: Response, onEvent: (ev: SurpriseEvent) => void): Promise<void> {
+  if (!resp.ok) {
+    // An error here (e.g. unknown/disabled skill) arrives as a plain JSON body with no
+    // SSE "data:" prefix, so it would otherwise be silently dropped by the parser below.
+    let detail = resp.statusText;
+    try {
+      const body = await resp.json();
+      if (body?.detail) detail = body.detail;
+    } catch {
+      // non-JSON error body — keep statusText
+    }
+    throw new Error(`Request failed (${resp.status}): ${detail}`);
+  }
   if (!resp.body) throw new Error("no response body");
   const reader = resp.body.getReader();
   const decoder = new TextDecoder();

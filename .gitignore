@@ -9,6 +9,10 @@ backend/*.db
 frontend/node_modules/
 frontend/dist/
 
+# Build artifacts
+backend/.pytest_cache/
+frontend/tsconfig.tsbuildinfo
+
 # Misc
 .DS_Store
 .venv/
