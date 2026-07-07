@@ -113,9 +113,16 @@ def run_skill(
             results.append({"id": call.id, "content": output})
         transcript.append({"role": "tool_results", "results": results})
 
-    return RunResult(
-        skill=skill.name,
-        title=skill.title,
-        output="I couldn't finish within the step limit. Try again.",
-        steps=steps,
+    # Ran out of tool-call budget — force one last answer from whatever's already been
+    # gathered instead of a bare apology. Ride the instruction along on the last
+    # tool_results turn (see _to_anthropic) rather than a new message, and drop the
+    # tool schemas so the model can't keep going instead of answering.
+    emit(step("Wrapping up with what's been gathered so far."))
+    transcript[-1]["note"] = (
+        "You're out of tool calls for this run. Using only what you've already "
+        "gathered above, give the best answer you can now. If something important is "
+        "still missing, say so plainly instead of inventing it."
     )
+    resp = llm.chat(system, transcript, tools=[])
+    title, output = _split_title(resp.text, fallback=skill.title)
+    return RunResult(skill=skill.name, title=title, output=output, steps=steps)

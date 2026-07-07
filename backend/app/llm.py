@@ -79,19 +79,21 @@ def _to_anthropic(transcript: list[dict[str, Any]]) -> list[dict[str, Any]]:
         elif role == "assistant":
             messages.append({"role": "assistant", "content": entry["raw"]})
         elif role == "tool_results":
-            messages.append(
+            content: list[dict[str, Any]] = [
                 {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "tool_result",
-                            "tool_use_id": r["id"],
-                            "content": _stringify(r["content"]),
-                        }
-                        for r in entry["results"]
-                    ],
+                    "type": "tool_result",
+                    "tool_use_id": r["id"],
+                    "content": _stringify(r["content"]),
                 }
-            )
+                for r in entry["results"]
+            ]
+            if entry.get("note"):
+                # Extra instruction riding along with the tool results — kept in the
+                # same user turn rather than a new message, since Anthropic requires
+                # strict user/assistant alternation (a second consecutive "user"
+                # message would be rejected).
+                content.append({"type": "text", "text": entry["note"]})
+            messages.append({"role": "user", "content": content})
     return messages
 
 

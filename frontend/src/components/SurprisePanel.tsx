@@ -104,12 +104,16 @@ export default function SurprisePanel({
             </>
           )}
         </div>
-        <p className="muted">Runs a random skill — or pick a specific one from the menu.</p>
-        <p className="inspiration">
-          Inspired by <em>Why Greatness Cannot Be Planned</em> — the idea that the most
-          interesting discoveries come from following curiosity, not a fixed objective.
-          Every "Surprise Me" run is a small, deliberate step off the beaten path.
-        </p>
+        {!running && events.length === 0 && !viewing && (
+          <>
+            <p className="muted">Runs a random skill — or pick a specific one from the menu.</p>
+            <p className="inspiration">
+              Inspired by <em>Why Greatness Cannot Be Planned</em> — the idea that the most
+              interesting discoveries come from following curiosity, not a fixed objective.
+              Every "Surprise Me" run is a small, deliberate step off the beaten path.
+            </p>
+          </>
+        )}
       </div>
 
       {auth && !done && (

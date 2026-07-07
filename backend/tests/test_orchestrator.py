@@ -5,7 +5,7 @@ import random
 
 from app.events import step
 from app.llm import LLMResponse, ToolCall
-from app.orchestrator import _split_title, run_skill
+from app.orchestrator import MAX_ITERATIONS, _split_title, run_skill
 from app.skills.base import Skill
 from app.skills.registry import enabled_skills, pick_random_skill
 from app.tools.base import Tool
@@ -148,3 +148,40 @@ def test_run_skill_prepends_datetime_for_calendar_tools():
     seed = llm.seen_transcript[0]["text"]
     assert seed.startswith("Current datetime (ISO-8601, local): 2026-07-06T18:30:00")
     assert seed.endswith("go")
+
+
+class NeverFinishingLLM:
+    """Always wants to call another tool — until no tools are offered, at which
+    point it's forced to answer. Mirrors what happens when a run hits MAX_ITERATIONS."""
+
+    def __init__(self):
+        self.calls = 0
+
+    def chat(self, system, transcript, tools):
+        self.calls += 1
+        if not tools:
+            return LLMResponse(text="Title: Partial\n\nHere's what I found so far.", raw="final")
+        return LLMResponse(
+            text="Checking again.",
+            tool_calls=[ToolCall(id=f"t{self.calls}", name="echo", input={"q": "hi"})],
+            raw="assistant-turn",
+        )
+
+
+def test_run_skill_forces_final_answer_after_max_iterations():
+    llm = NeverFinishingLLM()
+    events = []
+    result = run_skill(
+        _skill(),
+        user_id="u",
+        emit=events.append,
+        llm=llm,
+        registry=_registry_with_echo(),
+        interests=[],
+        now_iso="2026-07-05T09:00:00",
+    )
+    assert result.title == "Partial"
+    assert result.output == "Here's what I found so far."
+    # MAX_ITERATIONS normal rounds (all offering tools) + one forced final round (no tools)
+    assert llm.calls == MAX_ITERATIONS + 1
+    assert any("Wrapping up" in e.get("message", "") for e in events)
