@@ -44,10 +44,48 @@ TODAYS_PLAN = Skill(
     system_prompt=(
         "You are a scheduling assistant. Fetch today's Google Calendar events (use the "
         "current datetime to build the day's start/end window), summarize the day in order, "
-        "flag conflicts or tight gaps, and suggest how to focus."
+        "flag conflicts or tight gaps, and suggest how to focus.\n\n"
+        "If the current time is late in the day (roughly 6pm local or later) and today has no "
+        "more events remaining, also fetch tomorrow's calendar events and add a short 'Looking "
+        "ahead to tomorrow' section summarizing that day, so the user can start planning ahead. "
+        "Skip this extra section if it's earlier in the day or today still has events left."
     ),
     allowed_tools=["list_calendar_events", "list_emails"],
     seed_instruction="What does my day look like, and how should I plan around it?",
+)
+
+LATEST_PAPERS = Skill(
+    name="latest_papers",
+    title="Latest Papers",
+    description="A few genuinely interesting recent research papers, explained.",
+    system_prompt=(
+        "You are a research scout. Search the web for recent (last few days to weeks) "
+        "notable papers or preprints across science and tech — not tied to any particular "
+        "topic. Prefer arXiv, official conference/journal pages, or credible tech press "
+        "covering a paper. Pick 2-3 that are genuinely interesting or significant (novel "
+        "result, notable authors/lab, real-world impact) rather than just the first hits. "
+        "For each, read enough (fetch_url on the abstract or announcement page if useful) "
+        "to explain in plain language what it does and why it matters."
+    ),
+    allowed_tools=["web_search", "fetch_url"],
+    seed_instruction="What are some interesting recent papers I should know about?",
+)
+
+LATEST_FUNDED_STARTUPS = Skill(
+    name="latest_funded_startups",
+    title="Latest Funded Startups",
+    description="Recently announced startup funding rounds worth knowing about.",
+    system_prompt=(
+        "You are a startup and venture news scout. Search the web for startup funding "
+        "announcements from the last few days (seed through later rounds), across any "
+        "industry. Pick 3-4 that are genuinely notable (large round, notable investors, "
+        "interesting product or market) rather than just the first hits. For each, note the "
+        "company, what it does, the round size and stage, and lead investors if reported."
+    ),
+    allowed_tools=["web_search", "fetch_url"],
+    seed_instruction=(
+        "What startup funding rounds have been announced recently that are worth knowing about?"
+    ),
 )
 
 SCHEDULE_FOLLOWUP = Skill(
@@ -73,7 +111,14 @@ SCHEDULE_FOLLOWUP = Skill(
     surprise=False,  # writes to the calendar — only run on explicit user request
 )
 
-SKILLS: list[Skill] = [EMAIL_DIGEST, NEWS_FOR_YOU, TODAYS_PLAN, SCHEDULE_FOLLOWUP]
+SKILLS: list[Skill] = [
+    EMAIL_DIGEST,
+    NEWS_FOR_YOU,
+    TODAYS_PLAN,
+    LATEST_PAPERS,
+    LATEST_FUNDED_STARTUPS,
+    SCHEDULE_FOLLOWUP,
+]
 
 
 def enabled_skills() -> list[Skill]:

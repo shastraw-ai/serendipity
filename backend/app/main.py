@@ -64,9 +64,9 @@ def _run_worker(q: "queue.Queue", skill, note: str | None = None) -> None:
             extra_context=note,
         )
         interaction_id = store.save_interaction(
-            result.skill, skill.title, result.output, result.steps
+            result.skill, result.title, result.output, result.steps
         )
-        emit(done(result.skill, skill.title, result.output, interaction_id))
+        emit(done(result.skill, result.title, result.output, interaction_id))
     except Exception as exc:  # noqa: BLE001 — surface any failure to the client
         emit(error(str(exc)))
     finally:

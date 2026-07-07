@@ -21,8 +21,12 @@ MAX_ITERATIONS = 6  # safety bound on tool round-trips
 @dataclass
 class RunResult:
     skill: str
+    title: str
     output: str
     steps: list[dict[str, Any]]
+
+
+_TITLE_PREFIX = "Title:"
 
 
 def build_system_prompt(skill: Skill, interests: list[str], now_iso: str) -> str:
@@ -43,9 +47,22 @@ def build_system_prompt(skill: Skill, interests: list[str], now_iso: str) -> str
         "([text](url)) using a real URL from the tool results — a web result's `url`, or for "
         "a Gmail message its `id` as https://mail.google.com/mail/u/0/#all/<id>. Never "
         "fabricate a link; omit it if you don't have one.\n\n"
-        "When you have enough, reply with a concise, friendly Markdown summary for the user. "
-        "End with a short 'Suggested next step' line."
+        "When you have enough, reply with your final answer in this exact shape:\n"
+        f"{_TITLE_PREFIX} <a short, specific title for THIS run's actual content, e.g. "
+        "'Resolve AI interview follow-up' — never the generic task name>\n"
+        "<blank line>\n"
+        "<a concise, friendly Markdown summary for the user, ending with a short "
+        "'Suggested next step' line>"
     )
+
+
+def _split_title(text: str, fallback: str) -> tuple[str, str]:
+    """Pull the model's 'Title: ...' first line off its reply, if present."""
+    first_line, _, rest = text.partition("\n")
+    if first_line.strip().lower().startswith(_TITLE_PREFIX.lower()):
+        title = first_line.split(":", 1)[1].strip()
+        return (title or fallback), rest.lstrip("\n")
+    return fallback, text
 
 
 def run_skill(
@@ -76,7 +93,8 @@ def run_skill(
             emit(step(resp.text))  # the model's narration between tool calls
 
         if not resp.tool_calls:
-            return RunResult(skill=skill.name, output=resp.text, steps=steps)
+            title, output = _split_title(resp.text, fallback=skill.title)
+            return RunResult(skill=skill.name, title=title, output=output, steps=steps)
 
         results = []
         for call in resp.tool_calls:
@@ -91,6 +109,7 @@ def run_skill(
 
     return RunResult(
         skill=skill.name,
+        title=skill.title,
         output="I couldn't finish within the step limit. Try again.",
         steps=steps,
     )
